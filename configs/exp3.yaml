@@ -1,0 +1,52 @@
+data_path: '/scratch/shantanu.singh/habitat_data'
+train_split_file: 'splits/habitat/habitat_1scene_depth.txt'
+val_split_file: 'splits/habitat/habitat_1scene_depth.txt'
+load_weights_folder: 'checkpoints/anynet_habitat'
+models_to_load: ['disp_module']
+
+log_dir: 'results'
+num_epochs: 100
+scheduler_step_size: 15
+learning_rate: 1e-4
+train_workers: 10
+val_workers: 2
+batch_size: 4
+mode: dense
+
+no_ssim: False
+avg_bev_reprojection: False
+loss_weights:
+  reprojection_loss: 0.0
+  homography_loss: 1.0
+
+PIPELINE:
+  train: ['POSE'] 
+  run: ['DISPARITY', 'RGBD', 'BEV', 'POSE'] 
+
+DISPARITY:
+  module: 'AnyNet'
+  init_channels: 1
+  maxdisplist: [12, 3, 3]
+  spn_init_channels: 8
+  nblocks: 2
+  layers_3d: 4
+  channels_3d: 4
+  growth_rate: [4, 1, 1]
+  with_spn: True
+  freeze_weights: True
+
+RGBD_ENCODER:
+  module: 'concatenate'
+  normalize_depth: True
+  init_channels: 1
+  nblock: 2
+
+BEV_DECODER:
+  module: 'mock'
+  input_key: 'bev_gt'
+
+DEBUG:
+  extract_depth: 'get_gt_disparity_depth'
+  extract_poses: 'get_gt_poses'
+  generate_reprojection_pred: 'generate_dense_pred'
+  compute_reprojection_losses: 'compute_dense_reprojection_losses'

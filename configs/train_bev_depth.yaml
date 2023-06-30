@@ -1,0 +1,56 @@
+data_path: '/scratch/shantanu.singh/HabitatGibson/data'
+train_split_file: 'splits/gibson/gibson_train_depth.txt'
+val_split_file: 'splits/gibson/gibson_val_depth.txt'
+load_weights_folder: None
+models_to_load: ['disp_module']
+
+log_dir: 'results'
+num_epochs: 30
+scheduler_step_size: 18
+learning_rate: 1e-4
+train_workers: 8
+val_workers: 2
+batch_size: 12
+save_frequency: 1
+frame_ids: [0]
+mode: dense
+
+no_ssim: False
+avg_bev_reprojection: True
+bev_ce_weights: [1.0, 2.0, 2.0]
+loss_weights:
+  disparity_loss: 1.0
+  bev_loss: 0.0
+  gan_loss: 0.0
+  homography_loss: 0.0
+
+PIPELINE:
+  train: ['DISPARITY'] 
+  run: ['DISPARITY', 'BEV'] 
+
+DISPARITY:
+  module: 'JointDecoder'
+  encoder_lr: 1e-5
+  freeze_weights: False
+
+RGBD_ENCODER:
+  module: 'concatenate'
+  normalize_depth: True
+  init_channels: 1
+  nblock: 2
+
+BEV_DECODER:
+  module: 'mock'
+  type: 'bev'
+
+DISCRIMINATOR:
+  lr: 1e-4
+  scheduler_step_size: 100
+  discr_train_epoch: 100
+  freeze_weights: False
+
+DEBUG:
+  extract_depth: 'get_gt_disparity_depth'
+  extract_poses: 'get_gt_poses'
+  generate_reprojection_pred: 'generate_dense_pred'
+  compute_reprojection_losses: 'compute_dense_reprojection_losses'

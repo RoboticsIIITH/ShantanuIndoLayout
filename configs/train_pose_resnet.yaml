@@ -1,0 +1,66 @@
+data_path: '/scratch/shantanu.singh/HabitatGibson/data'
+train_split_file: 'splits/gibson/gibson_train_depth.txt'
+val_split_file: 'splits/gibson/gibson_val_depth.txt'
+load_weights_folder: null
+models_to_load: ['disp_module']
+
+log_dir: 'results'
+num_epochs: 150
+scheduler_step_size: 100
+learning_rate: 1e-4
+train_workers: 8
+val_workers: 2
+batch_size: 6
+save_frequency: 5
+frame_ids: [0, -2, -1, 1, 2]
+mode: debug
+
+no_ssim: False
+avg_bev_reprojection: False
+bev_ce_weights: [1.0, 2.0, 4.0] 
+bev_loss_lambda: 0.0
+loss_weights:
+  reprojection_loss : 1.0
+  homography_loss : 0.0
+  stc_loss : 1.0
+
+PIPELINE:
+  train: ['POSE'] 
+  run: ['DISPARITY', 'RGBD', 'POSE'] 
+
+DISPARITY:
+  module: 'AnyNet'
+  init_channels: 1
+  maxdisplist: [12, 3, 3]
+  spn_init_channels: 8
+  nblocks: 2
+  layers_3d: 4
+  channels_3d: 4
+  growth_rate: [4, 1, 1]
+  with_spn: True
+  start_epoch_for_spn: 0
+  loss_weights: [0.25, 0.5, 1., 1.]
+  max_disparity: 192
+  freeze_weights: True
+
+RGBD_ENCODER:
+  module: 'concatenate'
+  normalize_depth: True
+  init_channels: 1
+  nblock: 2
+
+BEV_DECODER:
+  module: 'mock'
+  input_key: "('bev_gt','l')"
+
+POSE:
+  pose_model_type: 'separate_resnet'
+  num_layers: 18
+  weights_init: 'pretrained'
+  in_channels: 4
+
+DEBUG:
+  extract_depth: 'get_gt_disparity_depth'
+  extract_poses: 'predict_poses'
+  generate_reprojection_pred: 'generate_dense_pred'
+  compute_reprojection_losses: 'compute_dense_reprojection_losses'

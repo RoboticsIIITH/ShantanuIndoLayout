@@ -1,0 +1,31 @@
+data_path: '/shanta_tmp/habitat_data'
+train_split_file: 'splits/habitat/habitat_train_depth.txt'
+val_split_file: 'splits/habitat/habitat_val_depth.txt'
+load_weights_folder: 'checkpoints/anynet_habitat'
+models_to_load: ['disp_module']
+
+log_dir: 'results'
+model_name: 'exp1'
+num_epochs: 20
+scheduler_step_size: 5
+train_workers: 12
+val_workers: 6
+batch_size: 16
+
+DISPARITY:
+  module: 'AnyNet'
+  init_channels: 1
+  maxdisplist: [12, 3, 3]
+  spn_init_channels: 8
+  nblocks: 2
+  layers_3d: 4
+  channels_3d: 4
+  growth_rate: [4, 1, 1]
+  with_spn: True
+  freeze_weights: True
+
+RGBD_ENCODER:
+  module: 'concatenate'
+  normalize_depth: True
+  init_channels: 1
+  nblock: 2

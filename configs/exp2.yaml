@@ -1,0 +1,37 @@
+data_path: '/scratch/shantanu.singh/habitat_data'
+train_split_file: 'splits/habitat/habitat_5scene_depth.txt'
+val_split_file: 'splits/habitat/habitat_2scene_depth.txt'
+load_weights_folder: 'checkpoints/anynet_habitat'
+models_to_load: ['disp_module']
+
+log_dir: 'results'
+num_epochs: 100
+scheduler_step_size: 15
+learning_rate: 1e-4
+train_workers: 8
+val_workers: 2
+batch_size: 4
+mode: dense
+
+DISPARITY:
+  module: 'AnyNet'
+  init_channels: 1
+  maxdisplist: [12, 3, 3]
+  spn_init_channels: 8
+  nblocks: 2
+  layers_3d: 4
+  channels_3d: 4
+  growth_rate: [4, 1, 1]
+  with_spn: True
+  freeze_weights: True
+
+RGBD_ENCODER:
+  module: 'concatenate'
+  normalize_depth: True
+  init_channels: 1
+  nblock: 2
+
+DEBUG:
+  generate_pred: 'generate_sparse_pred'
+  compute_reprojection_loss: 'compute_sparse_reprojection_loss'
+  compute_losses: 'compute_patch_losses'
